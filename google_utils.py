@@ -58,7 +58,6 @@ def compare_two_people(user1, user2):
 
         try:
             response = model.generate_content(user_prompt)
-            print("RESPONSE", response)
             if response.text.strip().lower() == "true":
                 return True
             else:
@@ -79,7 +78,7 @@ def return10Comparisons(currentUser, users_collection, exclude_users = []): # re
         if compare_two_people(currentUser, user) == True:
 
             result.append(user)
-            return result
+
 
     
  
@@ -88,7 +87,7 @@ def return10Comparisons(currentUser, users_collection, exclude_users = []): # re
 
 def generateAboutMe(user):
     try:
-        user_prompt = "Generate a short about me from my perspective based on these descriptions in one paragraph", str(user['name']), str(user['major']), str(user['interests'])
+        user_prompt = "Generate a short about me from my perspective based on these descriptions in one paragraph", str(user['first_name']), str(user['last_name']), str(user['major']), str(user['interests'])
         try:
             response = model.generate_content(user_prompt)
             print(response.text)

@@ -215,8 +215,11 @@
                     socialDiv.style.display = 'block';
                 } else {
                     socialDiv.style.display = 'none'; // Toggle off if clicked again
+                    socialDiv.textContent = ''; // Clear content when hiding
                 }
             });
+            const socialDiv = button.nextElementSibling;
+            socialDiv.style.display = 'none'; // Hide all social media divs initially 
         });
 
         // Handle "Next" button to move to the next card
