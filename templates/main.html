@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+
+        /* Navigation Styling */
+        .nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            padding: 10px 20px;
+            margin: 0 15px;
+            position: relative;
+        }
+
+        .nav a::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: black;
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav a:hover::after,
+        .nav a.active::after {
+            transform: scaleX(1);
+        }
+
+        /* Card container and card styling */
+        .card-container {
+            position: relative;
+            width: 300px;
+            height: 450px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .card {
+            width: 300px;
+            height: 400px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.8s ease-in-out, opacity 0.5s ease;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .card.exit {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        .card.exit.smooth {
+            clip-path: inset(0 0 0 50%);
+            border-radius: 0;
+        }
+
+        .card .profile-picture {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .card .display-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .card .interests {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 40px;
+        }
+
+        .card .next-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .card .next-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Logout link styling */
+        .logout {
+            text-decoration: none;
+            color: red;
+            margin-top: auto;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive Styling */
+        @media (max-width: 600px) {
+            .nav a {
+                font-size: 1em;
+                margin: 0 10px;
+                padding: 8px 15px;
+            }
+
+            .card-container {
+                width: 100%;
+                height: auto;
+            }
+
+            .card {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    {% if session %}
+    <div class="nav">
+        <a href="#meet-people" class="active">Meet People</a>
+        <a href="{{ url_for('preferences') }}">Change Profile</a>
+    </div>
+
+    <h1>Welcome, {{ session['name'] }}</h1>
+
+    <div class="card-container">
+        {% for user in users %}
+        <div class="card" data-index="{{ loop.index0 }}">
+            <img src="{{ user['picture'] or 'https://via.placeholder.com/80' }}" alt="Profile Picture"
+                class="profile-picture">
+            <div class="display-name">{{ user['name'] }}</div>
+            <div class="interests">
+                <p><strong>Major:</strong> {{ user['major'] or 'Undeclared' }}</p>
+                <p><strong>Interests:</strong> {{ user['interests'] or 'No interests listed' }}</p>
+            </div>
+            <button class="next-button">Next</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+    <h1>Welcome Guest</h1>
+    <p><a href="/login">Login</a></p>
+    {% endif %}
+
+    <script>
+        let currentCard = 0;
+        let totalCards = {{ users| length }};  // Initial number of users
+        let cards = document.querySelectorAll('.card');
+        let fetching = false;  // Flag to prevent multiple AJAX calls at once
+
+        function showNextCard() {
+            if (cards.length === 0) {
+                console.error('No cards available.');
+                return;
+            }
+
+            if (currentCard >= totalCards) {
+                console.error('No more cards to show.');
+                return;
+            }
+
+            const current = cards[currentCard];
+            const next = cards[(currentCard + 1) % totalCards];
+
+            if (current) {
+                current.classList.add('exit', 'smooth');
+                setTimeout(() => {
+                    current.classList.remove('active', 'exit', 'smooth');
+                }, 800);
+            }
+
+            if (next) {
+                next.classList.add('active');
+            }
+
+            currentCard = (currentCard + 1) % totalCards;
+
+            // Load more users when we're down to the last 2 cards
+            if (totalCards - currentCard <= 2 && !fetching) {
+                loadMoreUsers();
+            }
+        }
+
+        function loadMoreUsers() {
+            if (fetching) return;  // Prevent multiple AJAX calls
+            fetching = true;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/load_more_users", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const newUsers = JSON.parse(xhr.responseText);
+
+                    if (newUsers.length > 0) {
+                        newUsers.forEach(user => {
+                            const cardHtml = `
+                    <div class="card" data-index="${totalCards}">
+                        <img src="${user.picture || 'https://via.placeholder.com/80'}" alt="Profile Picture" class="profile-picture">
+                        <div class="display-name">${user.name}</div>
+                        <div class="interests">
+                            <p><strong>Major:</strong> ${user.major || 'Undeclared'}</p>
+                            <p><strong>Interests:</strong> ${user.interests || 'No interests listed'}</p>
+                        </div>
+                        <button class="next-button">Next</button>
+                    </div>`;
+
+                            document.querySelector('.card-container').insertAdjacentHTML('beforeend', cardHtml);
+                        });
+
+                        totalCards += newUsers.length;
+                        cards = document.querySelectorAll('.card');
+                        attachNextButtonListeners();
+                    } else {
+                        // No more users to load, show a message
+                        const noMoreUsersMessage = `
+                <div class="no-more-users">
+                    <p>No more users to display. Check back later!</p>
+                </div>`;
+                        document.querySelector('.card-container').insertAdjacentHTML('beforeend', noMoreUsersMessage);
+                    }
+                } else {
+                    console.error('Failed to load more users:', xhr.statusText);
+                }
+
+                fetching = false;  // Reset fetching flag
+            };
+
+            xhr.onerror = function () {
+                console.error('Error making the request.');
+                fetching = false;
+            };
+
+            xhr.send();
+        }
+
+        function attachNextButtonListeners() {
+            document.querySelectorAll('.next-button').forEach(button => {
+                button.removeEventListener('click', showNextCard);
+                button.addEventListener('click', showNextCard);
+            });
+        }
+
+        if (cards.length > 0) {
+            cards[currentCard].classList.add('active');
+        }
+        attachNextButtonListeners();
+
+    </script>
+
+</body>
+
+</html>
