@@ -20,7 +20,7 @@ We learned a lot about general web development (especially backend) and using ML
 It would be awesome to create a mobile app out of this that Pitt students could use and see true friendships arise out of it. 
 
 Team Members:
-Liam Brem - leb253@pitt.edu
-Matthew Caput - mcc212@pitt.edu
-Ryan Fusco - raf172@pitt.edu
-Jeevan Jouhal - jsj60@pitt.edu
+* Liam Brem - leb253@pitt.edu
+* Matthew Caput0 - mcc212@pitt.edu
+* Ryan Fusco - raf172@pitt.edu
+* Jeevan Jouhal - jsj60@pitt.edu
