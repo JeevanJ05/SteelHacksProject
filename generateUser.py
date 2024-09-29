@@ -69,5 +69,3 @@ def populate_database(num_students):
         users_collection.insert_many(student_data_list)
 
     print("Inserted", len(student_data_list), "students into the database.")
-
-populate_database(10)
