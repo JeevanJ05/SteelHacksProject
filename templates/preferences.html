@@ -149,9 +149,10 @@
             <p>The more you enter the better!</p>
             <textarea id="interests" name="interests" rows="4"
                 placeholder="Share some of your interests with us!">{{ preferences.interests if preferences else '' }}</textarea>
-            <!-- Upload Pic -->
-            <label for="picture">Upload a Picture of Yourself</label>
-            <input type="file" id="picture" name="picture" accept="image/*" required>
+            <!-- Social Media -->
+            <label for="socialMedia">Social Media</label>
+            <input type="text" id="socialMedia" name="socialMedia" placeholder="What's your social media name(specify instagram, snapchat, or mobile number)?" required
+                value="{{ preferences.socialMedia if preferences else '' }}">
 
             <!-- Submit Button -->
             <input type="submit" value="Submit">
