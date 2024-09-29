@@ -4,4 +4,4 @@ from google_utils import generateAboutMe
 
 mongo_client, users_collection = initClient()
 
-generateAboutMe(getUsers(users_collection)[2])
+generateAboutMe(getUsers(users_collection)[3])
